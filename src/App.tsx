@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import './App.css';
 import { useState } from 'react';
-import axios from 'axios';
 import Search from './components/Header/Header';
 import UsersList from './components/UsersList/UsersList';
 import UserDetails from './components/UserDetails/UserDetails';
@@ -35,7 +34,7 @@ export type UserListType = {
 export type UserDetailsPropsType = { user: SearchUserType | null };
 
 function App() {
-  let initialSearch = 'kama';
+  let initialSearch = 'eugenekov';
   const [selectedUser, setSelectedUser] = useState<SearchUserType | null>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearch);
 
