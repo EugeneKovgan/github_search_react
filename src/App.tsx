@@ -2,28 +2,42 @@ import React, { useEffect } from 'react';
 import './App.css';
 import { useState } from 'react';
 import axios from 'axios';
+import Search from './components/Header/Header';
+import UsersList from './components/UsersList/UsersList';
+import UserDetails from './components/UserDetails/UserDetails';
 
-type SearchUserType = {
+export type SearchUserType = {
   login: string;
   id: number;
 };
 
-type SearchResult = {
+export type SearchResult = {
   items: SearchUserType[];
 };
 
-type UserType = {
+export type UserType = {
   login: string;
   id: number;
   avatar_url: string;
 };
 
+export type SearchPropsType = {
+  value: string;
+  onSubmit: (fixedValue: string) => void;
+};
+
+export type UserListType = {
+  term: string;
+  selectedUser: SearchUserType | null;
+  onUserSelect: (user: SearchUserType) => void;
+};
+
+export type UserDetailsPropsType = { user: SearchUserType | null };
+
 function App() {
+  let initialSearch = 'kama';
   const [selectedUser, setSelectedUser] = useState<SearchUserType | null>(null);
-  const [userDetails, setUserDetails] = useState<UserType | null>(null);
-  const [users, setUsers] = useState<SearchUserType[]>([]);
-  const [tempSearch, setTempSearch] = useState('kama');
-  const [searchTerm, setSearchTerm] = useState('kama');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
 
   useEffect(() => {
     console.log('sync_title');
@@ -32,64 +46,21 @@ function App() {
     }
   }, [selectedUser]);
 
-  useEffect(() => {
-    console.log('sync_users');
-    axios.get<SearchResult>(`https://api.github.com/search/users?q=${searchTerm}`).then((res) => {
-      console.log(res.data);
-      setUsers(res.data.items);
-    });
-  }, [searchTerm]);
-
-  useEffect(() => {
-    console.log('sync_users_details');
-    if (!!selectedUser) {
-      axios.get<UserType>(`https://api.github.com/users/${selectedUser.login}`).then((res) => {
-        setUserDetails(res.data);
-        console.log(userDetails);
-      });
-    }
-  }, [selectedUser]);
-
   return (
     <div className='App'>
-      <header className='App-header'>
-        <input
-          placeholder='search'
-          type='text'
-          value={tempSearch}
-          onChange={(e) => {
-            setTempSearch(e.currentTarget.value);
-          }}
-        />
-        <button
-          onClick={() => {
-            setSearchTerm(tempSearch);
-          }}
-        >
-          find
-        </button>
-        <ul>
-          {users.map((u) => (
-            <li
-              key={u.id}
-              className={selectedUser === u ? 'selected' : ''}
-              onClick={() => {
-                setSelectedUser(u);
-              }}
-            >
-              {u.login}
-            </li>
-          ))}
-        </ul>{' '}
-      </header>
-      <div className='info_block'>
-        <h2>Username</h2>
-        {userDetails && (
-          <div className='info_block__descriptions'>
-            {userDetails.login}
-            <img src={userDetails.avatar_url} alt='avatar' />
-          </div>
-        )}
+      <Search value={searchTerm} onSubmit={(value) => setSearchTerm(value)} />
+      <button
+        onClick={() => {
+          setSearchTerm(initialSearch);
+        }}
+      >
+        reset
+      </button>
+
+      <div className='content'>
+        <UsersList term={searchTerm} selectedUser={selectedUser} onUserSelect={setSelectedUser} />
+
+        <UserDetails user={selectedUser} />
       </div>
     </div>
   );
